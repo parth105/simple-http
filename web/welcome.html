@@ -1,1 +1,12 @@
-<h1>Welcome! {{printf "%s" returnString}}</h1>
+<h1>Welcome to the wiki!</h1>
+{{if .}}
+  <p>Select a page to view:</p>
+  <div>
+    <ul>
+      {{range $page := .}}
+        <li><a href="/view/{{$page}}">{{$page}}</a></li>
+      {{end}}
+    </ul>
+  </div>
+{{end}}
+<!-- <p><a href="/edit">Add page</a></p> -->

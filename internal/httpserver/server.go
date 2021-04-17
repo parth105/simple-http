@@ -2,8 +2,10 @@ package httpserver
 
 import (
 	"html/template"
+	"io/ioutil"
 	"log"
 	"net/http"
+	"strings"
 
 	"github.com/parth105/simple-http/internal/wikipage"
 )
@@ -13,19 +15,18 @@ func renderTemplate(w http.ResponseWriter, t string, p *wikipage.Page) {
 	template.Execute(w, p)
 }
 
-/*
 func handler(w http.ResponseWriter, r *http.Request) {
-	data := r.URL.Path[1:]
-	returnString := ""
-	if len(data) > 0 {
-		returnString += fmt.Sprintf(" %s", data)
+	files, _ := ioutil.ReadDir(".")
+	var pages []string
+
+	for _, file := range files {
+		if strings.Contains(file.Name(), ".page") {
+			pages = append(pages, strings.Replace(file.Name(), ".page", "", -1))
+		}
 	}
-	//fmt.Fprintf(w, "Welcome%s!", returnString)
-	t, _ := template.ParseFiles("web/welcome.html")
-	t.Execute(w, returnString)
-	renderTemplate(w, "web/welcome.html", )
+	t := template.Must(template.ParseFiles("../web/welcome.html"))
+	t.Execute(w, pages)
 }
-*/
 
 func viewHandler(w http.ResponseWriter, r *http.Request) {
 	title := r.URL.Path[len("/view/"):]
@@ -55,7 +56,7 @@ func saveHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func StartServer() {
-	//http.HandleFunc("/", handler)
+	http.HandleFunc("/", handler)
 	http.HandleFunc("/view/", viewHandler)
 	http.HandleFunc("/edit/", editHandler)
 	http.HandleFunc("/save/", saveHandler)
