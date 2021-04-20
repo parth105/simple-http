@@ -13,8 +13,16 @@ import (
 // Called upon by each of the handlers to respond (render) to the client/requester
 // with a page.
 func renderTemplate(w http.ResponseWriter, t string, p *wikipage.Page) {
-	template, _ := template.ParseFiles(t)
-	template.Execute(w, p)
+	template, err := template.ParseFiles(t)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	err = template.Execute(w, p)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 }
 
 // Default handler for the root "/" URL
@@ -57,7 +65,10 @@ func saveHandler(w http.ResponseWriter, r *http.Request) {
 	title := r.URL.Path[len("/save/"):]
 	content := r.FormValue("body")
 	p := &wikipage.Page{Title: title, Body: []byte(content)}
-	p.Save()
+	err := p.Save()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
 	http.Redirect(w, r, "/view/"+title, http.StatusFound)
 }
 
