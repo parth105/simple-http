@@ -10,11 +10,14 @@ import (
 	"github.com/parth105/simple-http/internal/wikipage"
 )
 
+// Called upon by each of the handlers to respond (render) to the client/requester
+// with a page.
 func renderTemplate(w http.ResponseWriter, t string, p *wikipage.Page) {
 	template, _ := template.ParseFiles(t)
 	template.Execute(w, p)
 }
 
+// Default handler for the root "/" URL
 func handler(w http.ResponseWriter, r *http.Request) {
 	files, _ := ioutil.ReadDir(".")
 	var pages []string
@@ -28,6 +31,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	t.Execute(w, pages)
 }
 
+// Handler for viewing a wiki page
 func viewHandler(w http.ResponseWriter, r *http.Request) {
 	title := r.URL.Path[len("/view/"):]
 	p, err := wikipage.LoadPage(title)
@@ -38,6 +42,7 @@ func viewHandler(w http.ResponseWriter, r *http.Request) {
 	renderTemplate(w, "../web/view.html", p)
 }
 
+// Handler for editing an existing page or creating a new one
 func editHandler(w http.ResponseWriter, r *http.Request) {
 	title := r.URL.Path[len("/edit/"):]
 	p, err := wikipage.LoadPage(title)
@@ -47,6 +52,7 @@ func editHandler(w http.ResponseWriter, r *http.Request) {
 	renderTemplate(w, "../web/edit.html", p)
 }
 
+// Handler for saving a wiki page to the disk
 func saveHandler(w http.ResponseWriter, r *http.Request) {
 	title := r.URL.Path[len("/save/"):]
 	content := r.FormValue("body")
@@ -55,6 +61,7 @@ func saveHandler(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/view/"+title, http.StatusFound)
 }
 
+// Starts the wiki page server with handlers
 func StartServer() {
 	http.HandleFunc("/", handler)
 	http.HandleFunc("/view/", viewHandler)
