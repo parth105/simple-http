@@ -10,6 +10,10 @@ import (
 	"github.com/parth105/simple-http/internal/wikipage"
 )
 
+// Consolidate all the template parsing
+// template.Must panics if parsing returns non-nil error
+var templates *template.Template
+
 // Called upon by each of the handlers to respond (render) to the client/requester
 // with a page.
 func renderTemplate(w http.ResponseWriter, t string, p *wikipage.Page) {
@@ -35,7 +39,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 			pages = append(pages, strings.Replace(file.Name(), ".page", "", -1))
 		}
 	}
-	t := template.Must(template.ParseFiles("../web/welcome.html"))
+	t := template.Must(template.ParseFiles("web/welcome.html"))
 	t.Execute(w, pages)
 }
 
@@ -47,7 +51,7 @@ func viewHandler(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/edit/"+title, http.StatusFound)
 		return
 	}
-	renderTemplate(w, "../web/view.html", p)
+	renderTemplate(w, "web/view.html", p)
 }
 
 // Handler for editing an existing page or creating a new one
@@ -57,7 +61,7 @@ func editHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		p = &wikipage.Page{Title: title}
 	}
-	renderTemplate(w, "../web/edit.html", p)
+	renderTemplate(w, "web/edit.html", p)
 }
 
 // Handler for saving a wiki page to the disk
@@ -73,11 +77,17 @@ func saveHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // Starts the wiki page server with handlers
-func StartServer() {
+func StartServer(port string) {
+	// The static file paths are relative to the main.go
+	// and the name of the templates are the filenames (including the web path)
+	templates = template.Must(template.ParseFiles("web/welcome.html", "web/view.html", "web/edit.html"))
 	http.HandleFunc("/", handler)
 	http.HandleFunc("/view/", viewHandler)
 	http.HandleFunc("/edit/", editHandler)
 	http.HandleFunc("/save/", saveHandler)
 	//http.HandleFunc("/list/", viewHandler)
-	log.Fatal(http.ListenAndServe(":8089", nil))
+	if port == "" {
+		port = "8089"
+	}
+	log.Fatal(http.ListenAndServe(":"+port, nil))
 }
