@@ -2,9 +2,9 @@ package httpserver
 
 import (
 	"html/template"
-	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 	"strings"
 
 	"github.com/parth105/simple-http/internal/wikipage"
@@ -31,7 +31,7 @@ func renderTemplate(w http.ResponseWriter, t string, p *wikipage.Page) {
 
 // Default handler for the root "/" URL
 func handler(w http.ResponseWriter, r *http.Request) {
-	files, _ := ioutil.ReadDir(".")
+	files, _ := os.ReadDir(".")
 	var pages []string
 
 	for _, file := range files {
