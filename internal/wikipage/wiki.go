@@ -1,7 +1,7 @@
 package wikipage
 
 import (
-	"io/ioutil"
+	"os"
 )
 
 type Page struct {
@@ -11,12 +11,12 @@ type Page struct {
 
 func (p *Page) Save() error {
 	f := p.Title + ".page"
-	return ioutil.WriteFile(f, p.Body, 0600)
+	return os.WriteFile(f, p.Body, 0600)
 }
 
 func LoadPage(title string) (*Page, error) {
 	f := title + ".page"
-	data, err := ioutil.ReadFile(f)
+	data, err := os.ReadFile(f)
 	if err != nil {
 		return nil, err
 	}
